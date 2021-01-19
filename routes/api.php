@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\KameraController;
+use App\Http\Controllers\Api\KategoriController;
+use App\Http\Controllers\Api\SewaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +17,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::get('/', [KameraController::class, 'index']);
+Route::resources([
+    'kamera' => KameraController::class,
+    'kategori' => KategoriController::class,
+    'sewa' => SewaController::class,
+    
+]);
