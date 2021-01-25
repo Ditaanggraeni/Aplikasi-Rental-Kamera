@@ -18,11 +18,11 @@ class KameraController extends Controller
     {
         $kamera = Kamera::latest()->paginate(10);
 
-        return response()->json([
-            'success' => true,
+        return response()->json([ // yang direturn atau dikembalikan berupa json
+            'success' => true, 
             'message' => 'Daftar Data Kamera',
             'data' => $kamera
-        ], 200);
+        ], 200); //http status code sukses
 
     }
 
@@ -41,8 +41,9 @@ class KameraController extends Controller
             'harga'   => 'required'
         ]);
 
+        //upload image
         $image = $request->file('image');
-        $image->storeAs('public/kameras', $image->hashName());
+        $image->storeAs('public/kameras', $image->hashName()); //gambar yang di upload akan masuk ke folder public/kameras
     
         $kamera = Kamera::create([
             'image'     => $image->hashName(),
@@ -53,17 +54,17 @@ class KameraController extends Controller
 
         if($kamera)
             {
-                return response()->json([
+                return response()->json([ 
                     'success' => true,
                     'message' => 'Kamera berhasil di tambahkan',
                     'data' => $kamera
-                ], 200);
+                ], 200); //http status code sukses
             }else{
                 return response()->json([
                 'success' => false,
                 'message' => 'Kamera gagal di tambahkan',
                 'data' => $kamera
-            ], 409);
+            ], 409); //http status code conflict
     }
     }
     /**
@@ -74,7 +75,13 @@ class KameraController extends Controller
      */
     public function show($id)
     {
-        //
+        $kamera = Kamera::where('id', $id)->first();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Detail data kamera',
+            'data' => $kamera
+        ], 200);
     }
 
     /**
@@ -86,7 +93,52 @@ class KameraController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $this->validate($request, [
+            'merk'     => 'required',
+            'harga'   => 'required'
+        ]);
+        
+    //get data kamera by ID
+    $kamera = Kamera::find($id);
+
+    if($request->file('image') == "") {
+
+        $kamera->update([
+            'merk'     => $request->merk,
+            'harga'   => $request->harga
+        ]);
+
+    } else {
+        
+
+        //hapus old image
+        Storage::disk('local')->delete('public/kameras/'.$kamera->image);
+
+        //upload new image
+        $image = $request->file('image');
+        $image->storeAs('public/kameras', $image->hashName());
+
+        $kamera->update([
+            'image'     => $image->hashName(),
+            'merk'     => $request->merk,
+            'harga'   => $request->harga
+        ]);
+
+    }
+
+    if($kamera){
+        return response()->json([ 
+            'success' => true,
+            'message' => 'Kamera berhasil di update',
+            'data' => $kamera
+        ], 200); //http status code sukses
+    }else{
+        return response()->json([
+            'success' => false,
+            'message' => 'Kamera gagal di update',
+            'data' => $kamera
+        ], 409); //http status code conflict
+    }
     }
 
     /**
@@ -97,6 +149,12 @@ class KameraController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $kamera = Kamera::find($id)->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Kamera Deleted',
+                'data' => $kamera
+            ], 200);
     }
 }

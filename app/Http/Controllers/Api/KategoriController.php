@@ -66,7 +66,13 @@ class KategoriController extends Controller
      */
     public function show($id)
     {
-        //
+        $kategori = kategori::where('id', $id)->first();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Detail data kategori',
+            'data' => $kategori
+        ], 200);
     }
 
     /**
@@ -78,7 +84,16 @@ class KategoriController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $kategori = Kategori::find($id)->update([
+            'name' => $request->name,
+            'description' => $request->description
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kategori Updated',
+            'data' => $kategori
+        ], 200);
     }
 
     /**
@@ -89,6 +104,12 @@ class KategoriController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $kategori = kategori::find($id)->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kategori Deleted',
+            'data' => $kategori
+        ], 200);
     }
 }

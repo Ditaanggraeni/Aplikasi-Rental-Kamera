@@ -85,7 +85,13 @@ class SewaController extends Controller
      */
     public function show($id)
     {
-        //
+        $sewa = sewa::where('id', $id)->first();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Detail data sewa',
+            'data' => $sewa
+        ], 200);
     }
 
     /**
@@ -97,8 +103,71 @@ class SewaController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $this->validate($request, [
+            'merk'     => 'required',
+            'harga'   => 'required',
+            'penyewa'   => 'required',
+            'jaminan'   => 'required',
+            'tgl_sewa'   => 'required',
+            'tgl_kembali'   => 'required',
+            'denda'   => 'required',
+            'total'   => 'required',
+        ]);
+        
+    //get data sewa by ID
+    $sewa = sewa::find($id);
+
+    if($request->file('image') == "") {
+
+        $sewa->update([
+            'merk'     => $request->merk,
+            'harga'   => $request->harga,
+            'penyewa'   => $request->penyewa,
+            'jaminan'   => $request->jaminan,
+            'tgl_sewa'   => $request->tgl_sewa,
+            'tgl_kembali'   => $request->tgl_kembali,
+            'denda'   => $request->denda,
+            'total'   => $request->total
+        ]);
+
+    } else {
+
+        //hapus old image
+        Storage::disk('local')->delete('public/sewas/'.$sewa->image);
+
+        //upload new image
+        $image = $request->file('image');
+        $image->storeAs('public/sewas', $image->hashName());
+
+        $kamera->update($request->except('image'))([
+            'image'     => $image->hashName(),
+            'merk'     => $request->merk,
+            'harga'   => $request->harga,
+            'penyewa'   => $request->penyewa,
+            'jaminan'   => $request->jaminan,
+            'tgl_sewa'   => $request->tgl_sewa,
+            'tgl_kembali'   => $request->tgl_kembali,
+            'denda'   => $request->denda,
+            'total'   => $request->total
+        ]);
+
     }
+
+    if($sewa){
+        return response()->json([ 
+            'success' => true,
+            'message' => 'sewa berhasil di update',
+            'data' => $sewa
+        ], 200); //http status code sukses
+    }else{
+        return response()->json([
+            'success' => false,
+            'message' => 'sewa gagal di update',
+            'data' => $sewa
+        ], 409); //http status code conflict
+
+    }
+}
 
     /**
      * Remove the specified resource from storage.
@@ -108,6 +177,12 @@ class SewaController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $sewa = sewa::find($id)->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data Sewa Deleted',
+            'data' => $sewa
+        ], 200);
     }
 }
